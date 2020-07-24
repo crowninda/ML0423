@@ -1,0 +1,65 @@
+這幾天嘗試使用本機跑yolov3 方法及心得:~~~~ 
+
+我的電腦及下載套件規格: 
+Win10 
+NVIDIA: GTX 1660 Ti 
+安裝: 
+CuDNN : cudnn-10.1-windows10-x64-v7.6.4.38 
+CUDA : 10.1(即使我的系統資訊寫 NVIDIA CUDA11.0) 
+YoLoV3 : AlexeyAB (Alexey) · GitHub 可以載 
+需再單獨下載yolov3.weights 
+Opencv : 3.4.0 
+Visual studio : 2019 
+
+ 
+
+環境變數: 
+1.使用者path: 
+   1.opencv: 
+      Opencv\build\include 
+      Opencv\build\include\opencv 
+      Opencv\build\include\opencv2 
+      Opencv\build\x64\vc14\bin 
+
+   2.NVIDIA: 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\bin 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\include 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\lib\x64 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\lib 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\extras\CUPTI\lib64 
+      NVIDIA GPU Computing Tookit\CUDA\v10.1\libnvvp 
+
+ 
+
+流程: 
+安裝visual studio 2019 (簡稱VS2019) 
+安裝opencv，加環境變數 
+安裝CuDNN CUDA,將 CuDNN的lib,include, bin複製進CUDA的 lib,include, bin 
+將NVIDIA加入環境變數 
+以VS2019開darknet.sln 及yolo-cpp-dll.sln修改屬性(兩者同步驟)，編譯出darknet.exe 
+    *詳情請看 AlexeyAB (Alexey) · GitHub，寫得很清楚了 
+使用cmd，到darknet.exe所在地跑預測 
+
+ 
+
+修改 darknet.sln 的屬性時掉入的坑: 
+
+1.屬性的組態管理員要設release, x64，連結器的輸入 的其他相依性選open_world340.lib  
+
+2.opencv選open3.4.0-vc14_vc15.exe，可以不用選open-3.4.0.zip(當初一直搞不懂exe和zip是缺一不可還是其中一個即可，希望有高手可以跟我說，感謝) 
+
+3.網路上很多說2015或是2017最多，最後試的結果 vs2019也可以用  
+
+4.重組後出現的錯誤碼: 
+  1.MSB4019 : 將 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v10.1\extras\visual_studio_integration\MSBuildExtensions裡面的資料丟到 
+  C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations 詳情可以看:
+  https://social.msdn.microsoft.com/Forums/en-US/2823fb7b-c95b-43d5-b547-e5ac1199e4b7/vs2019-msb4019-error?forum=msbuild 
+
+  2.MSB3721 : 錯誤描述""C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" -gencode=arch=compute_75,code=\"sm_75,compute_75\" --use-local-env -ccbin "C:\Program Files (x86)\VC\bin\x86_amd64" -x cu   -I\include -IC:\opencv_3.0\opencv\build\include -I..\..\include -I..\..\3rdparty\stb\include -I..\..\3rdparty\pthreads\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\include" -I\include -I\include -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -D_MBCS -DLIB_EXPORTS -D_TIMESPEC_DEFINED -D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS -DGPU -DWIN32 -DDEBUG -D_CONSOLE -D_LIB -D_WINDLL -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\DLL_Debug\vc140.pdb /FS /Zi /RTC1 /MDd " -o x64\DLL_Debug\network_kernels.cu.obj "C:\Users\crown\darknet-master\src\network_kernels.cu"" 已結束，代碼為 1。   
+  ，需要去確認屬性裡的CUDA C/C++裡的Dervice裡的Code Generation，只能留下一個，我原本先留下compute_30,sm_30，組建失敗後換改成 compute_75,sm_75就可以了。 
+
+5.建置出darknet.exe後，要使用影片預測，需在 darknet.exe同一層放入 opencv_ffmpeg340.dll以及 opencv_ffmpeg340_64.dll 
+
+6.跑yolov3-tiny可以預測成功，但yolov3失敗，有安裝CUDA10.1將cudart64_101.dll, cudart64_7.dll到 C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.0\bin之中 ，
+  但仍失敗，後來是將 darknet.sln的屬性中CUDA C/C++中的Common的CUDA Toolkit Custom Dir 裡的路徑由11.0改到10.1，並修改相關應改數據(darknet.vcxproj和環境變數)，
+  重建 darknet.exe後成功跑yolov3。(我想是CUDA10.1可以跑YOLOV3而CUDA11.0無法，測試時間2020.07.23，但也是不知切確原因，有請高手告知，感謝) 
