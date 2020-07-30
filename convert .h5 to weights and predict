@@ -25,4 +25,4 @@ keras 2.2.4
   (位置是在miniconda3>envs>h5_to_weight_yolo3_master>Lib>Site_package)中刪除pip-20.0.dist-info這個資料夾才成功讓版本降回去。 
 
 4.虛擬環境中將python 3.7.6降到python3.5，並將tensorflow 2.2.0降到1.10.0，keras 2.2.4 稍降到2.2.0，
-  執行 check_weight.py時有遇到module 'tensorflow.compat' has no attribute 'v1'，將yolo.py裡面相關程式碼修改即可。 
+  執行 check_weight.py時有遇到error: module 'tensorflow.compat' has no attribute 'v1'，將yolo.py裡面相關程式碼修改即可。 
