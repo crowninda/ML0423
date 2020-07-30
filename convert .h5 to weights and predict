@@ -1,0 +1,28 @@
+原本電腦環境規格: 
+python3.7.6    
+tensorflow2.2.0   
+keras 2.2.4 
+
+依照網路建議(https://www.twblogs.net/a/5d6d7489bd9eee541c33b5a7)將 
+1.資料路徑(.h5路徑，cfg路徑)修改 
+2.依自己訓練類型將 voc_classes.txt, yolo_anchor.txt更改 
+3.修改yolov3.cfg檔中input size, output size, classes數, filter個數(例如我有10個種類，就填45因為(10種種類+5)*3)，即可run出轉換後的weights檔 
+
+接著，darknet-master修改新增一個coco.data及coco.names。coco.data需修改自己訓練時的class種類，coco.names則是修改成自己的 voc_classes.txt。跑預測時記得選轉換成功的weights檔和修改的yolov3.cfg檔以及新的 coco.data, coco.names 
+
+遇到的問題: 
+1.轉換得到error: 沒有batch_norlization_72這一層，讀.h5確定有此層也有內容 這個網頁有教如何讀檔
+  https://www.twblogs.net/a/5cca626abd9eee1ac30bbc84
+
+2.確認路徑及參數有設定好，但錯誤一樣，最後決定修改版本看是不是這個問題，選擇miniconda3，可以參考下面這篇資料: 
+  https://medium.com/datainpoint/python-essentials-conda-quickstart-1f1e9ecd1025
+  安裝虛擬環境步驟:   
+  pycharm -> setting -> project intepreter -> Add... -> Conda Environment的Conda executable，選擇路徑miniconda3\Scripts\conda.exe 
+  完成後到pycharm的terminal中active虛擬環境，指令可以參考這篇:
+  https://medium.com/python4u/%E7%94%A8conda%E5%BB%BA%E7%AB%8B%E5%8F%8A%E7%AE%A1%E7%90%86python%E8%99%9B%E6%93%AC%E7%92%B0%E5%A2%83-b61fd2a76566
+
+3.將pip由10.0.1升級到20.0結果得到error，是 cannot import name Format Control，不確定是否因為在虛擬環境中，無法降版本(有知道的高手請解惑)，最後是在虛擬環境的資料夾
+  (位置是在miniconda3>envs>h5_to_weight_yolo3_master>Lib>Site_package)中刪除pip-20.0.dist-info這個資料夾才成功讓版本降回去。 
+
+4.虛擬環境中將python 3.7.6降到python3.5，並將tensorflow 2.2.0降到1.10.0，keras 2.2.4 稍降到2.2.0，
+  執行 check_weight.py時有遇到module 'tensorflow.compat' has no attribute 'v1'，將yolo.py裡面相關程式碼修改即可。 
